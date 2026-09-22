@@ -36,14 +36,15 @@ jobs:
             "build-tools;${ANDROID_BUILD_TOOLS}" \
             "ndk;${ANDROID_NDK}"
 
-      # This repository does not currently contain Gradle Wrapper files,
-      # so setup-gradle provides the pinned Gradle executable.
+      # setup-gradle validates and caches the committed Gradle Wrapper.
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.9'
           cache-read-only: false
           cache-write-only: false
+
+      - name: Verify Gradle Wrapper
+        run: ./gradlew --version
 
       - name: Restore Android build cache
         id: android-build-cache
@@ -80,13 +81,13 @@ jobs:
           fi
 
       - name: Verify Android toolchain versions
-        run: gradle :app:verifyCiAndroidVersions
+        run: ./gradlew :app:verifyCiAndroidVersions
 
       - name: Run unit tests
-        run: gradle :app:testDebugUnitTest
+        run: ./gradlew :app:testDebugUnitTest
 
       - name: Build debug APK
-        run: gradle :app:assembleDebug
+        run: ./gradlew :app:assembleDebug
 
       - name: Save successful Android build cache
         if: ${{ success() && steps.android-build-cache.outputs.cache-hit != 'true' }}
